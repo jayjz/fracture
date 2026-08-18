@@ -1,0 +1,86 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "fracture"
+version = "0.1.0"
+description = "Chaos engineering for graph agents — failure injection harness for measuring recovery under tool failures, state corruption, goal drift, and hard limits."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [
+    { name = "Justin Coulam", email = "coulamjustin3@gmail.com" }
+]
+keywords = [
+    "agents",
+    "graph",
+    "chaos-engineering",
+    "failure-injection",
+    "langgraph",
+    "multi-agent",
+    "evaluation",
+    "resilience"
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+    "pydantic>=2.0",
+    "rich>=13.0",
+    "typer>=0.12",
+    "structlog>=24.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "ruff>=0.5",
+    "mypy>=1.10",
+    "pre-commit>=3.7",
+]
+llm = [
+    "openai>=1.30",
+    "anthropic>=0.28",
+    "ollama>=0.3",
+]
+viz = [
+    "streamlit>=1.35",
+]
+
+[project.urls]
+Homepage = "https://github.com/jayjz/fracture"
+Repository = "https://github.com/jayjz/fracture"
+Issues = "https://github.com/jayjz/fracture/issues"
+
+[project.scripts]
+fracture = "fracture.__main__:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/fracture"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+packages = ["fracture"]
