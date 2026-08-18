@@ -1,25 +1,26 @@
-"""Typed working state for a single Fracture run."""
-
-from __future__ import annotations
-
-from typing import Any
-
+# src/fracture/core/state.py
+import operator
+from typing import List, Dict, Any, Optional, Annotated
 from pydantic import BaseModel, Field
 
+class ToolCall(BaseModel):
+    id: str
+    name: str
+    arguments: Dict[str, Any]
+    result: Optional[str] = None
+    error: Optional[str] = None
+    duration_ms: float = 0.0
+    cost: float = 0.0
 
-class State(BaseModel):
-    """
-    Minimal shared state schema.
-
-    All topologies must operate on the same state shape so experiments remain comparable.
-    Extend carefully — changes here affect every experiment.
-    """
-
-    goal: str = Field(..., description="The original objective for this run")
-    messages: list[dict[str, Any]] = Field(default_factory=list)
-    data: dict[str, Any] = Field(default_factory=dict)
-    metadata: dict[str, Any] = Field(default_factory=dict)
-    step: int = 0
-    status: str = "running"  # running | completed | failed | timed_out | budget_exceeded
-
-    # TODO: add versioning and stricter schemas once task set is locked
+class AgentState(BaseModel):
+    original_goal: str
+    current_goal: str
+    
+    # Overwrite entirely (allows Amnesia injectors to delete items)
+    memory: List[Dict[str, str]] = Field(default_factory=list) 
+    
+    # Reducers: LangGraph will safely concatenate/add these from parallel workers
+    tool_history: Annotated[List[ToolCall], operator.add] = Field(default_factory=list)
+    iteration_count: Annotated[int, operator.add] = 0
+    total_cost: Annotated[float, operator.add] = 0.0
+    status: str = "running"

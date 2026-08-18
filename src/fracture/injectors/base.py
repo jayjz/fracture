@@ -1,32 +1,22 @@
-"""Base class for all failure injectors."""
-
-from __future__ import annotations
-
+# src/fracture/injectors/base.py
+import random
 from abc import ABC, abstractmethod
-from typing import Any
-
-from fracture.core.state import State
-
+from copy import deepcopy
+from fracture.core.state import AgentState, ToolCall
 
 class BaseInjector(ABC):
-    """
-    First-class failure injection component.
+    def __init__(self, probability: float = 0.3, severity: float = 0.5):
+        """
+        probability: 0.0 to 1.0 chance the injection triggers on a given turn.
+        severity: 0.0 to 1.0 multiplier for how destructive the injection is.
+        """
+        self.probability = probability
+        self.severity = severity
 
-    Intensity controls both probability and severity of the injected failure.
-    """
-
-    name: str
-
-    def __init__(self, intensity: float = 0.3) -> None:
-        if not 0.0 <= intensity <= 1.0:
-            raise ValueError("intensity must be between 0.0 and 1.0")
-        self.intensity = intensity
+    def should_trigger(self) -> bool:
+        return random.random() < self.probability
 
     @abstractmethod
-    async def maybe_inject(self, state: State, context: dict[str, Any]) -> State:
-        """
-        Possibly mutate state or context according to the failure model.
-
-        Must be side-effect free except for the returned state / logged events.
-        """
-        ...
+    def inject(self, state: AgentState, pending_call: Optional[ToolCall] = None) -> AgentState:
+        """Returns a mutated copy of the state/call."""
+        pass
